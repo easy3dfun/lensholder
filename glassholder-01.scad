@@ -40,9 +40,9 @@ else
 // --------------------------------------------------
 
 module lens_box() {
-    the_box();
-    the_spheres();
-    the_latches();
+    color([0.6,0.6,0.6]) the_box();
+    color([0.3,0.9,0.3]) the_spheres();
+    color([0.2,0.4,0.9]) the_latches();
 }
 
 module the_box() {
