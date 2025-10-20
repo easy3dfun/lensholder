@@ -15,10 +15,13 @@ lens_diameter    = 60;
 tolerance        = 0.5;   // Gap on each side so the lens easily fits
 wall_thickness   = 1;     // Walls of the box
 bottom_thickness = 1;     // Bottom of the box
-box_height       = 5;
+box_height       = 7;
 sphere_diameter  = 1;   // Size of the spheres
 sphere_pos_z     = 4;     // Vertical position of the spheres
 corner_radius    = 8;     // Radius for the rounded corners of the square box
+
+latch_height    = box_height*2 - bottom_thickness*2 - 1;
+latch_thickness = 1;
 
 /* Calculations */
 
@@ -54,21 +57,18 @@ module the_box() {
 
 module the_latches() {
     difference() {
-        inlay_walls();
-        rotate(45) cube([90,60,20], center=true);
+        difference() {
+            inlay_walls(inner_side);
+            rotate(45) cube([1000,60,1000], center=true);
+        };
+        inlay_walls(inner_side-latch_thickness);
     }
 }
 
-module inlay_walls() {
-    translate([0,0,0])
-        scale([0.965, 0.965, 1.5])
-            extra_walls();
-}
-
-module extra_walls() {
-    difference() {
-        outer_box();
-        translate([0,0,-4]) scale([1,1,3]) storage_space();
+module inlay_walls(length) {
+    linear_extrude(height=latch_height) minkowski() {
+        square(length - 2*inner_corner_radius, center=true);
+        circle(r=inner_corner_radius);
     }
 }
 
