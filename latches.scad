@@ -160,7 +160,5 @@ module wall(
         faces = generate_faces()
     );
 }
-// Example usage with different bend factors
-wall(shape_factor=0.5, arc_width=1, bend_factor=1); // Default bend
-translate([0, 50, 0]) wall(shape_factor=0.5, arc_width=1, bend_factor=0.5); // Sharper bend
-translate([0, 100, 0]) wall(shape_factor=0.5, arc_width=1, bend_factor=2); // Rounder bend
+
+wall(shape_factor=0.5, arc_width=1, bend_factor=1);
