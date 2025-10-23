@@ -1,4 +1,3 @@
-// Wall module with exported parameters for transform_1
 module wall(
     wall_length=100,
     wall_height=20,
