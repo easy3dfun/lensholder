@@ -1,14 +1,10 @@
-// Wall parameters
 wall_length = 100;
 wall_height = 20;
 wall_thickness = 2;
 steps_x = 40;
 steps_y = 3;
-
-// Calculate total number of points
 nr_points = steps_x * steps_y * 2; // front and back faces
 
-// Helper function to generate a single point
 function generate_point(i) =
     (i < steps_x * steps_y) ?
         // Front face point
@@ -25,7 +21,26 @@ function generate_point(i) =
             floor((i - steps_x * steps_y) / steps_x) * wall_height / (steps_y - 1)
         ];
 
-function transform_point(p) =
+// Lower the height of the left and right ends of the wall
+function transform_1(p, shape_factor=0.5) =
+    let(
+        L = wall_length,
+        h = wall_height,
+        u = p.x / L,                     // normalized length [0..1]
+        // Parabolic profile (center high, ends low)
+        profile_parab = 4 * (u - 0.5) * (u - 0.5),
+        // Gaussian profile (center high, ends exponentially low)
+        sigma = L / 4,
+        profile_gauss = 1 - exp(-pow((p.x - L/2) / sigma, 2)),
+        // Blend factor: 0 = parabolic, 1 = Gaussian, values in between mix the two smoothly
+        blended_profile = (1 - shape_factor) * profile_parab + shape_factor * profile_gauss,
+        amp = 1 * h,
+        dz = amp * blended_profile * (p.z / h)
+    )
+    [p.x, p.y, p.z - dz];
+
+// Bend the wall to become an edge
+function transform_2(p) =
     let(
         L = wall_length,
         t = wall_thickness,
@@ -48,11 +63,11 @@ function transform_point(p) =
       )
       [ pre + r - o, r + s3, p.z ]; // second straight segment (along +Y)
 
-// Generate points using helper and transform functions
-function generate_points() = [for (i = [0 : nr_points - 1]) transform_point(generate_point(i))];
+function generate_points() = [
+    for (i = [0 : nr_points - 1])
+        transform_2(transform_1(generate_point(i)))
+];
 
-
-// Generate faces (unchanged)
 function generate_faces() = [
     // Front face triangles
     for (i = [0 : steps_y - 2])
