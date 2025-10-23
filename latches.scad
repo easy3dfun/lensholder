@@ -22,13 +22,13 @@ function generate_point(i) =
         ];
 
 // Lower the height of the left and right ends of the wall
-function transform_1(p, shape_factor=0.5) =
+function transform_1(p, shape_factor=0.5, arc_width=1) =
     let(
         L = wall_length,
         h = wall_height,
         u = p.x / L,                     // normalized length [0..1]
         // Parabolic profile (center high, ends low)
-        profile_parab = 4 * (u - 0.5) * (u - 0.5),
+        profile_parab = abs(pow(4,arc_width) * pow(u - 0.5, arc_width*2)),
         // Gaussian profile (center high, ends exponentially low)
         sigma = L / 4,
         profile_gauss = 1 - exp(-pow((p.x - L/2) / sigma, 2)),
