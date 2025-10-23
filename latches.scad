@@ -1,169 +1,175 @@
-wall_length = 100;
-wall_height = 20;
-wall_thickness = 2;
-steps_x = 40;
-steps_y = 3;
-nr_points = steps_x * steps_y * 2; // front and back faces
+// Wall module with exported parameters for transform_1
+module wall(
+    wall_length=100,
+    wall_height=20,
+    wall_thickness=2,
+    steps_x=80,
+    steps_y=3,
+    shape_factor=0.5,
+    arc_width=1
+) {
+    nr_points = steps_x * steps_y * 2; // front and back faces
 
-function generate_point(i) =
-    (i < steps_x * steps_y) ?
-        // Front face point
-        [
-            (i % steps_x) * wall_length / (steps_x - 1),
-            0,
-            floor(i / steps_x) * wall_height / (steps_y - 1)
-        ]
-    :
-        // Back face point
-        [
-            ((i - steps_x * steps_y) % steps_x) * wall_length / (steps_x - 1),
-            wall_thickness,
-            floor((i - steps_x * steps_y) / steps_x) * wall_height / (steps_y - 1)
-        ];
+    // Point generator
+    function generate_point(i) =
+        (i < steps_x * steps_y) ?
+            // Front face point
+            [
+                (i % steps_x) * wall_length / (steps_x - 1),
+                0,
+                floor(i / steps_x) * wall_height / (steps_y - 1)
+            ]
+        :
+            // Back face point
+            [
+                ((i - steps_x * steps_y) % steps_x) * wall_length / (steps_x - 1),
+                wall_thickness,
+                floor((i - steps_x * steps_y) / steps_x) * wall_height / (steps_y - 1)
+            ];
 
-// Lower the height of the left and right ends of the wall
-function transform_1(p, shape_factor=0.5, arc_width=1) =
-    let(
-        L = wall_length,
-        h = wall_height,
-        u = p.x / L,                     // normalized length [0..1]
-        // Parabolic profile (center high, ends low)
-        profile_parab = abs(pow(4,arc_width) * pow(u - 0.5, arc_width*2)),
-        // Gaussian profile (center high, ends exponentially low)
-        sigma = L / 4,
-        profile_gauss = 1 - exp(-pow((p.x - L/2) / sigma, 2)),
-        // Blend factor: 0 = parabolic, 1 = Gaussian, values in between mix the two smoothly
-        blended_profile = (1 - shape_factor) * profile_parab + shape_factor * profile_gauss,
-        amp = 1 * h,
-        dz = amp * blended_profile * (p.z / h)
-    )
-    [p.x, p.y, p.z - dz];
+    // Lower the height of the left and right ends of the wall
+    function transform_1(p, shape_factor=shape_factor, arc_width=arc_width) =
+        let(
+            L = wall_length,
+            h = wall_height,
+            u = p.x / L,                     // normalized length [0..1]
+            profile_parab = abs(pow(4, arc_width) * pow(u - 0.5, arc_width*2)),
+            sigma = L / 4,
+            profile_gauss = 1 - exp(-pow((p.x - L/2) / sigma, 2)),
+            blended_profile = (1 - shape_factor) * profile_parab + shape_factor * profile_gauss,
+            amp = 1 * h,
+            dz = amp * blended_profile * (p.z / h)
+        )
+        [p.x, p.y, p.z - dz];
 
-// Bend the wall to become an edge
-function transform_2(p) =
-    let(
-        L = wall_length,
-        t = wall_thickness,
-        s = p.x,
-        o = p.y,
-        r = min(3 * t, (2 * L) / 3.141592653589793), // corner radius
-        arc = 1.5707963267948966 * r,                 // (pi/2)*r
-        pre = (L - arc) / 2                           // straight length before/after arc
-    )
-    s < pre
-    ? [ s, o, p.z ]  // first straight segment (along +X)
-    : s < (pre + arc)
-    ? let(
-        s2 = s - pre,
-        a = 90 * (s2 / arc) // degrees
-      )
-      [ pre + (r - o) * sin(a), r - (r - o) * cos(a), p.z ] // rounded 90° corner
-    : let(
-        s3 = s - (pre + arc)
-      )
-      [ pre + r - o, r + s3, p.z ]; // second straight segment (along +Y)
+    // Bend the wall to become an edge
+    function transform_2(p) =
+        let(
+            L = wall_length,
+            t = wall_thickness,
+            s = p.x,
+            o = p.y,
+            r = min(3 * t, (2 * L) / 3.141592653589793),
+            arc = 1.5707963267948966 * r,                 // (pi/2)*r
+            pre = (L - arc) / 2
+        )
+        s < pre
+        ? [ s, o, p.z ]
+        : s < (pre + arc)
+        ? let(
+            s2 = s - pre,
+            a = 90 * (s2 / arc)
+          )
+          [ pre + (r - o) * sin(a), r - (r - o) * cos(a), p.z ]
+        : let(
+            s3 = s - (pre + arc)
+          )
+          [ pre + r - o, r + s3, p.z ];
 
-function generate_points() = [
-    for (i = [0 : nr_points - 1])
-        transform_2(transform_1(generate_point(i)))
-];
+    function generate_points() = [
+        for (i = [0 : nr_points - 1])
+            transform_2(transform_1(generate_point(i)))
+    ];
 
-function generate_faces() = [
-    // Front face triangles
-    for (i = [0 : steps_y - 2])
-        for (j = [0 : steps_x - 2])
+    function generate_faces() = [
+        // Front face triangles
+        for (i = [0 : steps_y - 2])
+            for (j = [0 : steps_x - 2])
+                each [
+                    [
+                        i * steps_x + j,
+                        i * steps_x + j + 1,
+                        (i + 1) * steps_x + j
+                    ],
+                    [
+                        i * steps_x + j + 1,
+                        (i + 1) * steps_x + j + 1,
+                        (i + 1) * steps_x + j
+                    ]
+                ],
+
+        // Back face triangles (reversed winding)
+        for (i = [0 : steps_y - 2])
+            for (j = [0 : steps_x - 2])
+                each [
+                    [
+                        steps_x * steps_y + i * steps_x + j,
+                        steps_x * steps_y + (i + 1) * steps_x + j,
+                        steps_x * steps_y + i * steps_x + j + 1
+                    ],
+                    [
+                        steps_x * steps_y + i * steps_x + j + 1,
+                        steps_x * steps_y + (i + 1) * steps_x + j,
+                        steps_x * steps_y + (i + 1) * steps_x + j + 1
+                    ]
+                ],
+
+        // Side faces - left edge
+        for (i = [0 : steps_y - 2])
             each [
                 [
-                    i * steps_x + j,
-                    i * steps_x + j + 1,
-                    (i + 1) * steps_x + j
+                    i * steps_x,
+                    steps_x * steps_y + i * steps_x,
+                    (i + 1) * steps_x
                 ],
                 [
-                    i * steps_x + j + 1,
-                    (i + 1) * steps_x + j + 1,
-                    (i + 1) * steps_x + j
+                    steps_x * steps_y + i * steps_x,
+                    steps_x * steps_y + (i + 1) * steps_x,
+                    (i + 1) * steps_x
                 ]
             ],
 
-    // Back face triangles (reversed winding)
-    for (i = [0 : steps_y - 2])
-        for (j = [0 : steps_x - 2])
+        // Side faces - right edge
+        for (i = [0 : steps_y - 2])
             each [
                 [
-                    steps_x * steps_y + i * steps_x + j,
-                    steps_x * steps_y + (i + 1) * steps_x + j,
-                    steps_x * steps_y + i * steps_x + j + 1
+                    i * steps_x + steps_x - 1,
+                    (i + 1) * steps_x + steps_x - 1,
+                    steps_x * steps_y + i * steps_x + steps_x - 1
                 ],
                 [
-                    steps_x * steps_y + i * steps_x + j + 1,
-                    steps_x * steps_y + (i + 1) * steps_x + j,
-                    steps_x * steps_y + (i + 1) * steps_x + j + 1
+                    steps_x * steps_y + i * steps_x + steps_x - 1,
+                    (i + 1) * steps_x + steps_x - 1,
+                    steps_x * steps_y + (i + 1) * steps_x + steps_x - 1
                 ]
             ],
 
-    // Side faces - left edge
-    for (i = [0 : steps_y - 2])
-        each [
-            [
-                i * steps_x,
-                steps_x * steps_y + i * steps_x,
-                (i + 1) * steps_x
+        // Top edge
+        for (j = [0 : steps_x - 2])
+            each [
+                [
+                    (steps_y - 1) * steps_x + j,
+                    (steps_y - 1) * steps_x + j + 1,
+                    steps_x * steps_y + (steps_y - 1) * steps_x + j
+                ],
+                [
+                    steps_x * steps_y + (steps_y - 1) * steps_x + j,
+                    (steps_y - 1) * steps_x + j + 1,
+                    steps_x * steps_y + (steps_y - 1) * steps_x + j + 1
+                ]
             ],
-            [
-                steps_x * steps_y + i * steps_x,
-                steps_x * steps_y + (i + 1) * steps_x,
-                (i + 1) * steps_x
-            ]
-        ],
 
-    // Side faces - right edge
-    for (i = [0 : steps_y - 2])
-        each [
-            [
-                i * steps_x + steps_x - 1,
-                (i + 1) * steps_x + steps_x - 1,
-                steps_x * steps_y + i * steps_x + steps_x - 1
-            ],
-            [
-                steps_x * steps_y + i * steps_x + steps_x - 1,
-                (i + 1) * steps_x + steps_x - 1,
-                steps_x * steps_y + (i + 1) * steps_x + steps_x - 1
+        // Bottom edge
+        for (j = [0 : steps_x - 2])
+            each [
+                [
+                    j,
+                    steps_x * steps_y + j,
+                    j + 1
+                ],
+                [
+                    j + 1,
+                    steps_x * steps_y + j,
+                    steps_x * steps_y + j + 1
+                ]
             ]
-        ],
+    ];
 
-    // Top edge
-    for (j = [0 : steps_x - 2])
-        each [
-            [
-                (steps_y - 1) * steps_x + j,
-                (steps_y - 1) * steps_x + j + 1,
-                steps_x * steps_y + (steps_y - 1) * steps_x + j
-            ],
-            [
-                steps_x * steps_y + (steps_y - 1) * steps_x + j,
-                (steps_y - 1) * steps_x + j + 1,
-                steps_x * steps_y + (steps_y - 1) * steps_x + j + 1
-            ]
-        ],
+    polyhedron(
+        points = generate_points(),
+        faces = generate_faces()
+    );
+}
 
-    // Bottom edge
-    for (j = [0 : steps_x - 2])
-        each [
-            [
-                j,
-                steps_x * steps_y + j,
-                j + 1
-            ],
-            [
-                j + 1,
-                steps_x * steps_y + j,
-                steps_x * steps_y + j + 1
-            ]
-        ]
-];
-
-// Create the wall
-polyhedron(
-    points = generate_points(),
-    faces = generate_faces()
-);
+// Example usage:
+wall(shape_factor=0.5, arc_width=1);
