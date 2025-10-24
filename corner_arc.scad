@@ -73,96 +73,17 @@ module corner_arc(
 
     function generate_faces() = [
         // Front face triangles
-        for (i = [0 : steps_y - 2])
-            for (j = [0 : steps_x - 2])
-                each [
-                    [
-                        i * steps_x + j,
-                        i * steps_x + j + 1,
-                        (i + 1) * steps_x + j
-                    ],
-                    [
-                        i * steps_x + j + 1,
-                        (i + 1) * steps_x + j + 1,
-                        (i + 1) * steps_x + j
-                    ]
-                ],
-
+        for (i = [0 : steps_y - 2]) for (j = [0 : steps_x - 2]) each [[i * steps_x + j, i * steps_x + j + 1, (i + 1) * steps_x + j], [i * steps_x + j + 1, (i + 1) * steps_x + j + 1, (i + 1) * steps_x + j]],
         // Back face triangles (reversed winding)
-        for (i = [0 : steps_y - 2])
-            for (j = [0 : steps_x - 2])
-                each [
-                    [
-                        steps_x * steps_y + i * steps_x + j,
-                        steps_x * steps_y + (i + 1) * steps_x + j,
-                        steps_x * steps_y + i * steps_x + j + 1
-                    ],
-                    [
-                        steps_x * steps_y + i * steps_x + j + 1,
-                        steps_x * steps_y + (i + 1) * steps_x + j,
-                        steps_x * steps_y + (i + 1) * steps_x + j + 1
-                    ]
-                ],
-
+        for (i = [0 : steps_y - 2]) for (j = [0 : steps_x - 2]) each [[steps_x * steps_y + i * steps_x + j, steps_x * steps_y + (i + 1) * steps_x + j, steps_x * steps_y + i * steps_x + j + 1], [steps_x * steps_y + i * steps_x + j + 1, steps_x * steps_y + (i + 1) * steps_x + j, steps_x * steps_y + (i + 1) * steps_x + j + 1]],
         // Side faces - left edge
-        for (i = [0 : steps_y - 2])
-            each [
-                [
-                    i * steps_x,
-                    steps_x * steps_y + i * steps_x,
-                    (i + 1) * steps_x
-                ],
-                [
-                    steps_x * steps_y + i * steps_x,
-                    steps_x * steps_y + (i + 1) * steps_x,
-                    (i + 1) * steps_x
-                ]
-            ],
-
+        for (i = [0 : steps_y - 2]) each [[i * steps_x, (i + 1) * steps_x, steps_x * steps_y + (i + 1) * steps_x], [i * steps_x, steps_x * steps_y + (i + 1) * steps_x, steps_x * steps_y + i * steps_x]],
         // Side faces - right edge
-        for (i = [0 : steps_y - 2])
-            each [
-                [
-                    i * steps_x + steps_x - 1,
-                    (i + 1) * steps_x + steps_x - 1,
-                    steps_x * steps_y + i * steps_x + steps_x - 1
-                ],
-                [
-                    steps_x * steps_y + i * steps_x + steps_x - 1,
-                    (i + 1) * steps_x + steps_x - 1,
-                    steps_x * steps_y + (i + 1) * steps_x + steps_x - 1
-                ]
-            ],
-
+        for (i = [0 : steps_y - 2]) each [[i * steps_x + steps_x - 1, steps_x * steps_y + i * steps_x + steps_x - 1, (i + 1) * steps_x + steps_x - 1], [steps_x * steps_y + i * steps_x + steps_x - 1, steps_x * steps_y + (i + 1) * steps_x + steps_x - 1, (i + 1) * steps_x + steps_x - 1]],
         // Top edge
-        for (j = [0 : steps_x - 2])
-            each [
-                [
-                    (steps_y - 1) * steps_x + j,
-                    (steps_y - 1) * steps_x + j + 1,
-                    steps_x * steps_y + (steps_y - 1) * steps_x + j
-                ],
-                [
-                    steps_x * steps_y + (steps_y - 1) * steps_x + j,
-                    (steps_y - 1) * steps_x + j + 1,
-                    steps_x * steps_y + (steps_y - 1) * steps_x + j + 1
-                ]
-            ],
-
+        for (j = [0 : steps_x - 2]) each [[(steps_y - 1) * steps_x + j, (steps_y - 1) * steps_x + j + 1, steps_x * steps_y + (steps_y - 1) * steps_x + j + 1], [(steps_y - 1) * steps_x + j, steps_x * steps_y + (steps_y - 1) * steps_x + j + 1, steps_x * steps_y + (steps_y - 1) * steps_x + j]],
         // Bottom edge
-        for (j = [0 : steps_x - 2])
-            each [
-                [
-                    j,
-                    steps_x * steps_y + j,
-                    j + 1
-                ],
-                [
-                    j + 1,
-                    steps_x * steps_y + j,
-                    steps_x * steps_y + j + 1
-                ]
-            ]
+        for (j = [0 : steps_x - 2]) each [[j, steps_x * steps_y + j, j + 1], [steps_x * steps_y + j, steps_x * steps_y + j + 1, j + 1]]
     ];
 
     polyhedron(
