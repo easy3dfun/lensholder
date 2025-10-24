@@ -6,10 +6,10 @@ module wall(
     steps_y=3,
     shape_factor=0.5,
     arc_width=1,
-    bend_factor=1 // New parameter to control bend roundness
+    bend_factor=1
 ) {
     nr_points = steps_x * steps_y * 2; // front and back faces
-    // Point generator
+
     function generate_point(i) =
         (i < steps_x * steps_y) ?
             // Front face point
@@ -25,6 +25,7 @@ module wall(
                 wall_thickness,
                 floor((i - steps_x * steps_y) / steps_x) * wall_height / (steps_y - 1)
             ];
+
     // Lower the height of the left and right ends of the wall
     function transform_1(p, shape_factor=shape_factor, arc_width=arc_width) =
         let(
@@ -39,7 +40,8 @@ module wall(
             dz = amp * blended_profile * (p.z / h)
         )
         [p.x, p.y, p.z - dz];
-    // Bend the wall to become an edge with adjustable roundness
+
+    // Bend the wall to become an edge
     function transform_2(p, bend_factor=bend_factor) =
         let(
             L = wall_length,
@@ -63,10 +65,12 @@ module wall(
             s3 = s - (pre + arc)
           )
           [ pre + r - o, r + s3, p.z ];
+
     function generate_points() = [
         for (i = [0 : nr_points - 1])
             transform_2(transform_1(generate_point(i)), bend_factor)
     ];
+
     function generate_faces() = [
         // Front face triangles
         for (i = [0 : steps_y - 2])
@@ -83,6 +87,7 @@ module wall(
                         (i + 1) * steps_x + j
                     ]
                 ],
+
         // Back face triangles (reversed winding)
         for (i = [0 : steps_y - 2])
             for (j = [0 : steps_x - 2])
@@ -98,6 +103,7 @@ module wall(
                         steps_x * steps_y + (i + 1) * steps_x + j + 1
                     ]
                 ],
+
         // Side faces - left edge
         for (i = [0 : steps_y - 2])
             each [
@@ -112,6 +118,7 @@ module wall(
                     (i + 1) * steps_x
                 ]
             ],
+
         // Side faces - right edge
         for (i = [0 : steps_y - 2])
             each [
@@ -126,6 +133,7 @@ module wall(
                     steps_x * steps_y + (i + 1) * steps_x + steps_x - 1
                 ]
             ],
+
         // Top edge
         for (j = [0 : steps_x - 2])
             each [
@@ -140,6 +148,7 @@ module wall(
                     steps_x * steps_y + (steps_y - 1) * steps_x + j + 1
                 ]
             ],
+
         // Bottom edge
         for (j = [0 : steps_x - 2])
             each [
@@ -155,6 +164,7 @@ module wall(
                 ]
             ]
     ];
+
     polyhedron(
         points = generate_points(),
         faces = generate_faces()
