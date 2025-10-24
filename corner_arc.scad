@@ -1,4 +1,4 @@
-module wall(
+module corner_arc(
     length=100,
     height=20,
     thickness=2,
@@ -171,4 +171,4 @@ module wall(
     );
 }
 
-wall();
+corner_arc();
