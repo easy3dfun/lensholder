@@ -6,7 +6,7 @@ module wall(
     steps_y=3,
     shape_factor=0.5,
     arc_width=1,
-    bend_factor=1
+    bend_factor=1,
 ) {
     nr_points = steps_x * steps_y * 2; // front and back faces
 
@@ -37,7 +37,7 @@ module wall(
             profile_gauss = 1 - exp(-pow((p.x - L/2) / sigma, 2)),
             blended_profile = (1 - shape_factor) * profile_parab + shape_factor * profile_gauss,
             amp = 1 * h,
-            dz = amp * blended_profile * (p.z / h)
+            dz = amp * blended_profile * (p.z / h),
         )
         [p.x, p.y, p.z - dz];
 
@@ -51,7 +51,7 @@ module wall(
             // Scale the radius with bend_factor
             r = min(3 * t, (2 * L) / 3.141592653589793) * bend_factor,
             arc = 1.5707963267948966 * r, // (pi/2)*r
-            pre = (L - arc) / 2
+            pre = (L - arc) / 2,
         )
         s < pre
         ? [ s, o, p.z ]
