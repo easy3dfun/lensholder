@@ -161,4 +161,4 @@ module wall(
     );
 }
 
-wall(shape_factor=0.5, arc_width=1, bend_factor=1);
+wall();
