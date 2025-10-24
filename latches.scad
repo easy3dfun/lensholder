@@ -1,12 +1,12 @@
 module wall(
-    wall_length=100,
-    wall_height=20,
-    wall_thickness=2,
+    length=100,
+    height=20,
+    thickness=2,
     steps_x=80,
     steps_y=3,
     shape_factor=0.5,
     arc_width=1,
-    bend_factor=1,
+    roundness=1,
 ) {
     nr_points = steps_x * steps_y * 2; // front and back faces
 
@@ -14,23 +14,23 @@ module wall(
         (i < steps_x * steps_y) ?
             // Front face point
             [
-                (i % steps_x) * wall_length / (steps_x - 1),
+                (i % steps_x) * length / (steps_x - 1),
                 0,
-                floor(i / steps_x) * wall_height / (steps_y - 1)
+                floor(i / steps_x) * height / (steps_y - 1)
             ]
         :
             // Back face point
             [
-                ((i - steps_x * steps_y) % steps_x) * wall_length / (steps_x - 1),
-                wall_thickness,
-                floor((i - steps_x * steps_y) / steps_x) * wall_height / (steps_y - 1)
+                ((i - steps_x * steps_y) % steps_x) * length / (steps_x - 1),
+                thickness,
+                floor((i - steps_x * steps_y) / steps_x) * height / (steps_y - 1)
             ];
 
     // Lower the height of the left and right ends of the wall
     function transform_1(p, shape_factor=shape_factor, arc_width=arc_width) =
         let(
-            L = wall_length,
-            h = wall_height,
+            L = length,
+            h = height,
             u = p.x / L, // normalized length [0..1]
             profile_parab = abs(pow(4, arc_width) * pow(u - 0.5, arc_width*2)),
             sigma = L / 4,
@@ -42,14 +42,14 @@ module wall(
         [p.x, p.y, p.z - dz];
 
     // Bend the wall to become an edge
-    function transform_2(p, bend_factor=bend_factor) =
+    function transform_2(p, roundness=roundness) =
         let(
-            L = wall_length,
-            t = wall_thickness,
+            L = length,
+            t = thickness,
             s = p.x,
             o = p.y,
-            // Scale the radius with bend_factor
-            r = min(3 * t, (2 * L) / 3.141592653589793) * bend_factor,
+            // Scale the radius with roundness
+            r = min(3 * t, (2 * L) / 3.141592653589793) * roundness,
             arc = 1.5707963267948966 * r, // (pi/2)*r
             pre = (L - arc) / 2,
         )
@@ -68,7 +68,7 @@ module wall(
 
     function generate_points() = [
         for (i = [0 : nr_points - 1])
-            transform_2(transform_1(generate_point(i)), bend_factor)
+            transform_2(transform_1(generate_point(i)), roundness)
     ];
 
     function generate_faces() = [
