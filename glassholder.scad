@@ -20,9 +20,6 @@ sphere_diameter  = 1;   // Size of the spheres
 sphere_pos_z     = 4;     // Vertical position of the spheres
 corner_radius    = 8;     // Radius for the rounded corners of the square box
 
-latch_height    = box_height*2 - bottom_thickness*2 - 1;
-latch_thickness = 1;
-
 /* Calculations */
 
 diameter_with_tolerance = lens_diameter + 2*tolerance;
@@ -45,7 +42,7 @@ else
 module lens_box() {
     color([0.6,0.6,0.6]) the_box();
     color([0.3,0.9,0.3]) the_spheres();
-    color([0.2,0.4,0.9]) the_latches();
+    color([0.2,0.4,0.9]) the_corners();
 }
 
 module the_box() {
@@ -55,21 +52,17 @@ module the_box() {
     }
 }
 
-module the_latches() {
-    difference() {
-        difference() {
-            inlay_walls(inner_side);
-            rotate(45) cube([1000,60,1000], center=true);
-        };
-        inlay_walls(inner_side-latch_thickness);
-    }
-}
-
-module inlay_walls(length) {
-    linear_extrude(height=latch_height) minkowski() {
-        square(length - 2*inner_corner_radius, center=true);
-        circle(r=inner_corner_radius);
-    }
+module the_corners() {
+    corner_length = 30;
+    translate([inner_side/2-corner_length/2-1.5,-inner_side/2,0])
+    corner_arc(
+      length       = corner_length,
+      height       = 11,
+      thickness    = 1,
+      roundness    = 2.3,
+      shape_factor = 0,
+      arc_width    = 10,
+    );
 }
 
 module outer_box() {
@@ -101,4 +94,98 @@ module the_spheres() {
         translate([x, y, sphere_pos_z])
                 sphere(r=sphere_diameter);
     }
+}
+
+module corner_arc(
+    length=100,
+    height=20,
+    thickness=2,
+    steps_x=80,
+    steps_y=3,
+    shape_factor=0.5,
+    arc_width=1,
+    roundness=1,
+) {
+    nr_points = steps_x * steps_y * 2; // front and back faces
+
+    function generate_point(i) =
+        (i < steps_x * steps_y) ?
+            // Front face point
+            [
+                (i % steps_x) * length / (steps_x - 1),
+                0,
+                floor(i / steps_x) * height / (steps_y - 1)
+            ]
+        :
+            // Back face point
+            [
+                ((i - steps_x * steps_y) % steps_x) * length / (steps_x - 1),
+                thickness,
+                floor((i - steps_x * steps_y) / steps_x) * height / (steps_y - 1)
+            ];
+
+    // Lower the height of the left and right ends of the wall
+    function transform_1(p, shape_factor=shape_factor, arc_width=arc_width) =
+        let(
+            L = length,
+            h = height,
+            u = p.x / L, // normalized length [0..1]
+            profile_parab = abs(pow(4, arc_width) * pow(u - 0.5, arc_width*2)),
+            sigma = L / 4,
+            profile_gauss = 1 - exp(-pow((p.x - L/2) / sigma, 2)),
+            blended_profile = (1 - shape_factor) * profile_parab + shape_factor * profile_gauss,
+            amp = 1 * h,
+            dz = amp * blended_profile * (p.z / h),
+        )
+        [p.x, p.y, p.z - dz];
+
+    // Bend the wall to become an edge
+    function transform_2(p, roundness=roundness) =
+        let(
+            L = length,
+            t = thickness,
+            s = p.x,
+            o = p.y,
+            // Scale the radius with roundness
+            r = min(3 * t, (2 * L) / 3.141592653589793) * roundness,
+            arc = 1.5707963267948966 * r, // (pi/2)*r
+            pre = (L - arc) / 2,
+        )
+        s < pre
+        ? [ s, o, p.z ]
+        : s < (pre + arc)
+        ? let(
+            s2 = s - pre,
+            a = 90 * (s2 / arc)
+          )
+          [ pre + (r - o) * sin(a), r - (r - o) * cos(a), p.z ]
+        : let(
+            s3 = s - (pre + arc)
+          )
+          [ pre + r - o, r + s3, p.z ];
+
+    function generate_points() = [
+        for (i = [0 : nr_points - 1])
+            transform_2(transform_1(generate_point(i)), roundness)
+    ];
+
+    function generate_faces() = [
+        // Front face triangles
+        for (i = [0 : steps_y - 2]) for (j = [0 : steps_x - 2]) each [[i * steps_x + j, i * steps_x + j + 1, (i + 1) * steps_x + j], [i * steps_x + j + 1, (i + 1) * steps_x + j + 1, (i + 1) * steps_x + j]],
+        // Back face triangles (reversed winding)
+        for (i = [0 : steps_y - 2]) for (j = [0 : steps_x - 2]) each [[steps_x * steps_y + i * steps_x + j, steps_x * steps_y + (i + 1) * steps_x + j, steps_x * steps_y + i * steps_x + j + 1], [steps_x * steps_y + i * steps_x + j + 1, steps_x * steps_y + (i + 1) * steps_x + j, steps_x * steps_y + (i + 1) * steps_x + j + 1]],
+        // Side faces - left edge
+        for (i = [0 : steps_y - 2]) each [[i * steps_x, (i + 1) * steps_x, steps_x * steps_y + (i + 1) * steps_x], [i * steps_x, steps_x * steps_y + (i + 1) * steps_x, steps_x * steps_y + i * steps_x]],
+        // Side faces - right edge
+        for (i = [0 : steps_y - 2]) each [[i * steps_x + steps_x - 1, steps_x * steps_y + i * steps_x + steps_x - 1, (i + 1) * steps_x + steps_x - 1], [steps_x * steps_y + i * steps_x + steps_x - 1, steps_x * steps_y + (i + 1) * steps_x + steps_x - 1, (i + 1) * steps_x + steps_x - 1]],
+        // Top edge
+        for (j = [0 : steps_x - 2]) each [[(steps_y - 1) * steps_x + j, (steps_y - 1) * steps_x + j + 1, steps_x * steps_y + (steps_y - 1) * steps_x + j + 1], [(steps_y - 1) * steps_x + j, steps_x * steps_y + (steps_y - 1) * steps_x + j + 1, steps_x * steps_y + (steps_y - 1) * steps_x + j]],
+        // Bottom edge
+        for (j = [0 : steps_x - 2]) each [[j, steps_x * steps_y + j, j + 1], [steps_x * steps_y + j, steps_x * steps_y + j + 1, j + 1]]
+    ];
+
+    polyhedron(
+        points = generate_points(),
+        faces = generate_faces()
+    );
 }
