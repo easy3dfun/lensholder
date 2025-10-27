@@ -1,25 +1,73 @@
 <!doctype html>
 <html>
- <body>
+  <head>
+    <style>
+      body {
+        display: grid;
+        grid-template-rows: auto 1fr 1fr;
+        gap: 10px;
+        margin: 20px;
+        height: 95vh;
+        font-family: Arial, sans-serif;
+      }
+      #inputArea {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      #urlInput {
+        flex: 1;
+        padding: 8px;
+      }
+      #renderOutput, #statsOutput {
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+        font-family: monospace;
+      }
+      textarea {
+        resize: none;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="inputArea">
+      <input type="text" id="urlInput" placeholder="Enter file URL..." />
+      <button id="renderBtn">Render</button>
+    </div>
+
+    <textarea id="renderOutput" placeholder="Rendered file will appear here..."></textarea>
+
+    <textarea id="statsOutput" placeholder="Stats..."></textarea>
 
     <script>
-    
-        async function main() {
-            await addFile('corner_arc.scad');
-            await addFile('glassholder.scad');
+      const renderBtn = document.getElementById('renderBtn');
+      const urlInput = document.getElementById('urlInput');
+      const renderOutput = document.getElementById('renderOutput');
+      const statsOutput = document.getElementById('statsOutput');
+
+      renderBtn.addEventListener('click', async () => {
+        const url = urlInput.value.trim();
+        if (!url) {
+          alert('Please enter a file URL.');
+          return;
         }
 
-        async function addFile(url) {
-            const response = await fetch(url);
-            const text = await response.text();
-            const pre = document.createElement('pre');
-            pre.textContent = text;
-            document.body.appendChild(pre);
-        }
-        
-        main();
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error('File not found or cannot be loaded.');
+          const text = await response.text();
+          renderOutput.value = text;
 
+          const lineCount = text.split('\n').length;
+          statsOutput.value = `Number of lines: ${lineCount}`;
+        } catch (error) {
+          renderOutput.value = '';
+          statsOutput.value = `Error: ${error.message}`;
+        }
+      });
     </script>
 
- </body>
+  </body>
 </html>
