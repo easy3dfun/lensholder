@@ -47,6 +47,38 @@
       const renderOutput = document.getElementById('renderOutput');
       const statsOutput = document.getElementById('statsOutput');
 
+      async function fetchAndExpand(url, includedFiles = new Set()) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Cannot load file: ${url}`);
+        let text = await response.text();
+
+        const lines = text.split('\n');
+        const expandedLines = [];
+
+        for (const line of lines) {
+          const match = line.trim().match(/^include\s*<([^>]+)>/i);
+          if (match) {
+            const includeFile = match[1];
+            includedFiles.add(includeFile);
+
+            // Resolve file URL relative to the current file
+            const base = new URL(url, window.location.href);
+            const includeUrl = new URL(includeFile, base).href;
+
+            try {
+              const includedContent = await fetchAndExpand(includeUrl, includedFiles);
+              expandedLines.push(includedContent);
+            } catch (err) {
+              expandedLines.push(`// ERROR: Failed to include ${includeFile}: ${err.message}`);
+            }
+          } else {
+            expandedLines.push(line);
+          }
+        }
+
+        return expandedLines.join('\n');
+      }
+
       renderBtn.addEventListener('click', async () => {
         const url = urlInput.value.trim();
         if (!url) {
@@ -55,13 +87,13 @@
         }
 
         try {
-          const response = await fetch(url);
-          if (!response.ok) throw new Error('File not found or cannot be loaded.');
-          const text = await response.text();
-          renderOutput.value = text;
+          const includedFiles = new Set();
+          const expandedText = await fetchAndExpand(url, includedFiles);
+          renderOutput.value = expandedText;
 
-          const lineCount = text.split('\n').length;
-          statsOutput.value = `Number of lines: ${lineCount}`;
+          const lineCount = expandedText.split('\n').length;
+          const includedList = Array.from(includedFiles).join('\n') || 'None';
+          statsOutput.value = `Number of lines: ${lineCount}\n\nIncluded files:\n${includedList}`;
         } catch (error) {
           renderOutput.value = '';
           statsOutput.value = `Error: ${error.message}`;
