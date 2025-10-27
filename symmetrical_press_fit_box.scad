@@ -34,8 +34,10 @@ module symmetrical_press_fit_box(
       }
   }
 
-  module the_corners() {
-      corner_length = 30;
+ module the_corners() {
+    corner_length = 30;
+    for(i=[0:3]) {
+      rotate([0, 0, i*90])
       translate([inner_side/2-corner_length/2-1.5,-inner_side/2,0])
       corner_arc(
         length       = corner_length,
@@ -45,8 +47,9 @@ module symmetrical_press_fit_box(
         shape_factor = 0,
         arc_width    = 10,
       );
+    }
   }
-
+  
   module outer_box() {
           // Outer box (square with rounded corners)
           linear_extrude(height=box_height) {
