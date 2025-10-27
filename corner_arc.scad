@@ -6,7 +6,7 @@ module corner_arc(
     steps_y=3,
     shape_factor=0.5,
     arc_width=1,
-    roundness=1,
+    rad=1,
 ) {
     nr_points = steps_x * steps_y * 2; // front and back faces
 
@@ -42,15 +42,15 @@ module corner_arc(
         [p.x, p.y, p.z - dz];
 
     // Bend the wall to become an edge
-    function transform_2(p, roundness=roundness) =
+    function transform_2(p, rad=2) =
         let(
             L = length,
             t = thickness,
             s = p.x,
             o = p.y,
             // Scale the radius with roundness
-            r = min(3 * t, (2 * L) / 3.141592653589793) * roundness,
-            arc = 1.5707963267948966 * r, // (pi/2)*r
+            r = rad,
+            arc = 1.5707963267948966 * rad,
             pre = (L - arc) / 2,
         )
         s < pre
@@ -68,7 +68,7 @@ module corner_arc(
 
     function generate_points() = [
         for (i = [0 : nr_points - 1])
-            transform_2(transform_1(generate_point(i)), roundness)
+            transform_2(transform_1(generate_point(i)), rad)
     ];
 
     function generate_faces() = [
@@ -91,5 +91,3 @@ module corner_arc(
         faces = generate_faces()
     );
 }
-
-corner_arc();
