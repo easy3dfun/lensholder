@@ -4,7 +4,7 @@
     down by the little spheres.
 */
 
-include <symmetrical_press_fit_box>
+include <symmetrical_press_fit_box.scad>
 
 /* Quality */
 $fa = 3;   // minimum angle per fragment
