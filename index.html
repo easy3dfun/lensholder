@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+ <body>
+
+    <script>
+    
+        async function main() {
+            await addFile('corner_arc.scad');
+            await addFile('glassholder.scad');
+        }
+
+        async function addFile(url) {
+            const response = await fetch(url);
+            const text = await response.text();
+            const pre = document.createElement('pre');
+            pre.textContent = text;
+            document.body.appendChild(pre);
+        }
+        
+        main();
+
+    </script>
+
+ </body>
+</html>
