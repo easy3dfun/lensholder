@@ -2,6 +2,8 @@
     Two of these objects make a closable box.
 */
 
+include <corner_arc.scad>
+
 module symmetrical_press_fit_box(
   /* Parameters in mm */
   content_diameter = 60,
