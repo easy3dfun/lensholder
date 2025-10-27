@@ -36,9 +36,10 @@ module symmetrical_press_fit_box(
 
  module the_corners() {
     corner_length = 30;
+    x_offset = inner_corner_radius * (1 - PI/4);
     for(i=[0:3]) {
       rotate([0, 0, i*90])
-      translate([inner_side/2-corner_length/2-1.5,-inner_side/2,0])
+      translate([inner_side/2-corner_length/2-x_offset, -inner_side/2, 0])
       corner_arc(
         length       = corner_length,
         height       = 11,
