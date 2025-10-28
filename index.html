@@ -52,7 +52,9 @@
       const statsOutput = document.getElementById('statsOutput');
 
       async function fetchAndExpand(url, includedFiles = new Set()) {
-        const response = await fetch(url);
+        const timeParam = `time=${Date.now()}`;
+        const fetchUrl = url.includes('?') ? `${url}&${timeParam}` : `${url}?${timeParam}`;
+        const response = await fetch(fetchUrl);
         if (!response.ok) throw new Error(`Cannot load file: ${url}`);
         let text = await response.text();
 
@@ -107,4 +109,3 @@
 
   </body>
 </html>
-
