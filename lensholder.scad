@@ -37,7 +37,7 @@ lens_box();
 
 module lens_box() {
     the_box();
-    color([0.3,0.9,0.3]) lensholder_clamps_spheres();
+    color([0.3,0.9,0.3]) lensholder_clamps_tori();
 }
 
 module the_box() {
