@@ -5,6 +5,7 @@
 */
 
 include <symmetrical_press_fit_box.scad>
+include <lensholder_clamps.scad>
 
 /* Quality */
 $fa = 3;   // minimum angle per fragment
@@ -36,7 +37,7 @@ lens_box();
 
 module lens_box() {
     the_box();
-    color([0.3,0.9,0.3]) the_spheres();
+    color([0.3,0.9,0.3]) lensholder_clamps_spheres();
 }
 
 module the_box() {
@@ -50,14 +51,3 @@ module the_box() {
         corner_radius    = 8,     // Radius for the rounded corners of the square box
     );
 }
-
-module the_spheres() {
-    for (i = [0:3]) {
-        angle = i*90;
-        x = (diameter_with_tolerance/2) * cos(angle);
-        y = (diameter_with_tolerance/2) * sin(angle);
-        translate([x, y, sphere_pos_z])
-                sphere(r=sphere_diameter);
-    }
-}
-
