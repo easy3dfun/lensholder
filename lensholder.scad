@@ -11,8 +11,6 @@
 $fa = 3;   // minimum angle per fragment
 $fs = 0.5;   // minimum size of fragment
 
-test_print = false;    // Set to true to only create a fraction of the object
-
 /* Parameters in mm */
 lens_diameter    = 60;
 tolerance        = 0.5;   // Gap on each side so the lens easily fits
