@@ -59,7 +59,8 @@
         let text = await response.text();
 
         const lines = text.split('\n');
-        const expandedLines = [];
+        const mainLines = [];
+        const includesAtEnd = [];
 
         for (const line of lines) {
           const match = line.trim().match(/^include\s*<([^>]+)>/i);
@@ -73,16 +74,17 @@
 
             try {
               const includedContent = await fetchAndExpand(includeUrl, includedFiles);
-              expandedLines.push(includedContent);
+              includesAtEnd.push(`// Included from ${includeFile}\n${includedContent}`);
             } catch (err) {
-              expandedLines.push(`// ERROR: Failed to include ${includeFile}: ${err.message}`);
+              includesAtEnd.push(`// ERROR: Failed to include ${includeFile}: ${err.message}`);
             }
           } else {
-            expandedLines.push(line);
+            mainLines.push(line);
           }
         }
 
-        return expandedLines.join('\n');
+        // Combine main body followed by includes at the bottom
+        return [...mainLines, ...includesAtEnd].join('\n');
       }
 
       renderBtn.addEventListener('click', async () => {
