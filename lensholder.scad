@@ -4,8 +4,8 @@
     down by the little spheres.
 */
 
-include <symmetrical_press_fit_box.scad>
-include <lensholder_clamps.scad>
+//> include_bottom symmetrical_press_fit_box.scad
+//> include_bottom lensholder_clamps.scad
 
 /* Quality */
 $fa = 3;   // minimum angle per fragment
