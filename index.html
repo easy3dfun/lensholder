@@ -59,38 +59,32 @@
         let text = await response.text();
 
         const lines = text.split('\n');
-        const expandedLines = [];
-        const includesToAdd = [];
+        const mainLines = [];
+        const includesAtEnd = [];
 
         for (const line of lines) {
-          const match = line.trim().match(/^\/\/>\s*include_bottom\s+(.+)$/i);
+          const match = line.trim().match(/^include\s*<([^>]+)>/i);
           if (match) {
-            const includeFile = match[1].trim();
+            const includeFile = match[1];
             includedFiles.add(includeFile);
 
             // Resolve file URL relative to the current file
             const base = new URL(url, window.location.href);
             const includeUrl = new URL(includeFile, base).href;
 
-            expandedLines.push(line); // keep the include comment line
-            
             try {
               const includedContent = await fetchAndExpand(includeUrl, includedFiles);
-              includesToAdd.push(includedContent); // queue up for bottom insertion
+              includesAtEnd.push(`// Included from ${includeFile}\n${includedContent}`);
             } catch (err) {
-              includesToAdd.push(`// ERROR: Failed to include ${includeFile}: ${err.message}`);
+              includesAtEnd.push(`// ERROR: Failed to include ${includeFile}: ${err.message}`);
             }
           } else {
-            expandedLines.push(line);
+            mainLines.push(line);
           }
         }
 
-        // Append all included content at the end of the file
-        if (includesToAdd.length > 0) {
-          expandedLines.push(includesToAdd.join('\n'));
-        }
-
-        return expandedLines.join('\n');
+        // Combine main body followed by includes at the bottom
+        return [...mainLines, ...includesAtEnd].join('\n');
       }
 
       renderBtn.addEventListener('click', async () => {
