@@ -63,27 +63,29 @@
         const includesAtEnd = [];
 
         for (const line of lines) {
-          const match = line.trim().match(/^include\s*<([^>]+)>/i);
-          if (match) {
-            const includeFile = match[1];
-            includedFiles.add(includeFile);
+          const match = line.trim().match(/^\/\/>\s*include_bottom\s+(.+)$/i);
+          const includeFile = match ? match[1] : null;
 
-            // Resolve file URL relative to the current file
+          if (includeFile) {
+            includedFiles.add(includeFile);
+            mainLines.push(`//> include_bottom ${includeFile}`);
+
             const base = new URL(url, window.location.href);
             const includeUrl = new URL(includeFile, base).href;
 
             try {
               const includedContent = await fetchAndExpand(includeUrl, includedFiles);
-              includesAtEnd.push(`// Included from ${includeFile}\n${includedContent}`);
+              includesAtEnd.push(
+                `\n//> // ----------\n//> // ${includeFile}\n//> // ----------\n\n${includedContent}\n`
+              );
             } catch (err) {
-              includesAtEnd.push(`// ERROR: Failed to include ${includeFile}: ${err.message}`);
+              includesAtEnd.push(`\n// ERROR: Failed to include ${includeFile}: ${err.message}\n`);
             }
           } else {
             mainLines.push(line);
           }
         }
 
-        // Combine main body followed by includes at the bottom
         return [...mainLines, ...includesAtEnd].join('\n');
       }
 
