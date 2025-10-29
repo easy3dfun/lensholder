@@ -59,32 +59,38 @@
         let text = await response.text();
 
         const lines = text.split('\n');
-        const mainLines = [];
-        const includesAtEnd = [];
+        const expandedLines = [];
+        const includesToAdd = [];
 
         for (const line of lines) {
-          const match = line.trim().match(/^include\s*<([^>]+)>/i);
+          const match = line.trim().match(/^\/\/>\s*include_bottom\s+(.+)$/i);
           if (match) {
-            const includeFile = match[1];
+            const includeFile = match[1].trim();
             includedFiles.add(includeFile);
 
             // Resolve file URL relative to the current file
             const base = new URL(url, window.location.href);
             const includeUrl = new URL(includeFile, base).href;
 
+            expandedLines.push(line); // keep the include comment line
+            
             try {
               const includedContent = await fetchAndExpand(includeUrl, includedFiles);
-              includesAtEnd.push(`// Included from ${includeFile}\n${includedContent}`);
+              includesToAdd.push(includedContent); // queue up for bottom insertion
             } catch (err) {
-              includesAtEnd.push(`// ERROR: Failed to include ${includeFile}: ${err.message}`);
+              includesToAdd.push(`// ERROR: Failed to include ${includeFile}: ${err.message}`);
             }
           } else {
-            mainLines.push(line);
+            expandedLines.push(line);
           }
         }
 
-        // Combine main body followed by includes at the bottom
-        return [...mainLines, ...includesAtEnd].join('\n');
+        // Append all included content at the end of the file
+        if (includesToAdd.length > 0) {
+          expandedLines.push(includesToAdd.join('\n'));
+        }
+
+        return expandedLines.join('\n');
       }
 
       renderBtn.addEventListener('click', async () => {
