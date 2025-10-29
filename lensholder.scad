@@ -7,7 +7,7 @@
 //> include_bottom symmetrical_press_fit_box.scad
 //> include_bottom lensholder_clamps.scad
 
-production_quality = true;
+production_quality = false;
 
 $fa = production_quality ?    1 :    4;
 $fs = production_quality ? 0.02 : 0.25;
