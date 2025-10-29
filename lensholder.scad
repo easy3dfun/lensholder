@@ -7,9 +7,10 @@
 //> include_bottom symmetrical_press_fit_box.scad
 //> include_bottom lensholder_clamps.scad
 
-/* Quality */
-$fa = 3;   // minimum angle per fragment
-$fs = 0.5;   // minimum size of fragment
+production_quality = true;
+
+$fa = production_quality ?    1 :    4;
+$fs = production_quality ? 0.02 : 0.25;
 
 /* Parameters in mm */
 lens_diameter    = 60;
