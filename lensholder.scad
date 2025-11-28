@@ -9,8 +9,8 @@
 
 production_quality = false;
 
-$fa = production_quality ?    1 :    4; // minimum angle of a fragment
-$fs = production_quality ? 0.02 : 0.25; // minimum size of a fragment
+$fa = production_quality ?     2 :    4; // minimum angle of a fragment
+$fs = production_quality ? 0.125 : 0.25; // minimum size of a fragment
 
 /* Parameters in mm */
 lens_diameter    = 60;
