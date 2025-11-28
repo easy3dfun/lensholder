@@ -28,17 +28,22 @@ module symmetrical_press_fit_box(
   // Modules
   // --------------------------------------------------
 
-module corner_points() {
+  module corner_points() {
       point_radius = 1.5;
-      point_height = 5; // How high up the sphere is from the bottom
+      point_height = 5;
       z_pos = bottom_thickness + point_height / 2;
-      // The following offset is putting about 1mm of the sphere into the box
       offset_from_center = (inner_side / 2) - wall_thickness - point_radius + 0.8536;
-      translate([offset_from_center, offset_from_center, z_pos]) {
-          sphere(r=point_radius);
-      }
-      translate([-offset_from_center, -offset_from_center, z_pos]) {
-          sphere(r=point_radius);
+      
+      intersection() {
+          outer_box();  // Clip to the outer boundary
+          union() {
+              translate([offset_from_center, offset_from_center, z_pos]) {
+                  sphere(r=point_radius);
+              }
+              translate([-offset_from_center, -offset_from_center, z_pos]) {
+                  sphere(r=point_radius);
+              }
+          }
       }
   }
 
