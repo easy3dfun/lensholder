@@ -4,6 +4,8 @@
     down by the little spheres.
 */
 
+version = "v0.5";
+
 //> include_bottom symmetrical_press_fit_box.scad
 //> include_bottom lensholder_clamps.scad
 
@@ -29,6 +31,10 @@ inner_side = diameter_with_tolerance;
 inner_corner_radius = corner_radius - wall_thickness;
 
 lens_box();
+
+translate([0,0,0.8])
+  linear_extrude(1)
+    text(version, halign="center", valign="center", size=8);
 
 // --------------------------------------------------
 // Modules
