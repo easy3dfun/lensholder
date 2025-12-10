@@ -27,8 +27,13 @@ if(show_copy)
   inner_corner_radius = corner_radius - wall_thickness;
 
   color([0.6,0.6,0.6]) the_box();
-  color([0.2,0.4,0.9]) the_corners();
   color([0.8,0.2,0.2]) corner_points();
+  color([0.2,0.4,0.9]) difference() {
+    the_corners();
+    translate([0, 0, box_height*2])
+      rotate([180, 0, 0])
+        corner_points();
+  };
 
   // --------------------------------------------------
   // Modules
