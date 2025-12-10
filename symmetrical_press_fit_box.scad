@@ -43,7 +43,7 @@ if(show_copy)
       offset_from_center = inner_side / 2 + 1;
       
       intersection() {
-          outer_box();  // Clip to the outer boundary
+          outer_box(outer_side-0.01);  // Clip inside the wall of the box
           union() {
               translate([offset_from_center - corner_dist, offset_from_center, z_pos]) {
                   sphere(r=point_radius);
@@ -89,11 +89,11 @@ if(show_copy)
     }
   }
   
-  module outer_box() {
+  module outer_box(size=outer_side) {
           // Outer box (square with rounded corners)
           linear_extrude(height=box_height) {
               minkowski() {
-                  square(outer_side - 2*corner_radius, center=true);
+                  square(size - 2*corner_radius, center=true);
                   circle(r=corner_radius);
               }
           }
