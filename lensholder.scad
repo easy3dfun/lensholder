@@ -4,7 +4,7 @@
     down by the little spheres.
 */
 
-version = "v0.5";
+version = "v0.502";
 
 //> include_bottom symmetrical_press_fit_box.scad
 //> include_bottom lensholder_clamps.scad
