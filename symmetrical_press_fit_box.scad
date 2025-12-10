@@ -12,7 +12,13 @@ module symmetrical_press_fit_box(
   bottom_thickness = 1,     // Bottom of the box
   box_height       = 7,
   corner_radius    = 8,     // Radius for the rounded corners of the square box
+  show_copy        = false, // Shows a rotated copy of the box so one can see how two of these play together
 ) {
+
+if(show_copy)
+  translate([0, 0, box_height*2+0.01])
+    rotate([180,0,0])
+      symmetrical_press_fit_box();
 
   /* Calculations */
   diameter_with_tolerance = content_diameter + 2*tolerance;
