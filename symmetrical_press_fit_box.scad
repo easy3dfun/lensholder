@@ -36,7 +36,7 @@ if(show_copy)
 
   module corner_points() {
       point_radius = 1.5;
-      point_height = 6; // How high up the sphere is from the bottom
+      point_height = 8; // How high up the sphere is from the bottom
       corner_dist = 10;
       z_pos = bottom_thickness + point_height / 2;
       // The following offset is putting about 1mm of the sphere into the box
