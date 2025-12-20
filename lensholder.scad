@@ -4,7 +4,7 @@
     down by the little spheres.
 */
 
-version = "v0.502";
+version = "v0.503";
 
 //> include_bottom symmetrical_press_fit_box.scad
 //> include_bottom lensholder_clamps.scad
@@ -34,7 +34,7 @@ lens_box();
 
 translate([0,0,0.8])
   linear_extrude(1)
-    text(version, halign="center", valign="center", size=8);
+    text(version, halign="center", valign="center", size=4);
 
 // --------------------------------------------------
 // Modules
