@@ -39,8 +39,11 @@ if(show_copy)
   // Modules
   // --------------------------------------------------
 
-  module corner_points(point_width=1) {
+  module corner_points(w=1, h=1, d=1) {
       point_radius = 1.5;
+      w = w * point_radius;
+      h = h * point_radius;
+      d = d * point_radius;
       point_height = 8; // How high up the sphere is from the bottom
       corner_dist = 10;
       z_pos = bottom_thickness + point_height / 2;
@@ -51,27 +54,27 @@ if(show_copy)
           outer_box(outer_side-0.01);  // Clip inside the wall of the box
           union() {
               translate([offset_from_center - corner_dist, offset_from_center, z_pos]) {
-                  corner_point(point_radius, point_width);
+                  corner_point(w, h, d);
               }
 
               translate([offset_from_center, offset_from_center-corner_dist, z_pos]) {
-                  corner_point(point_radius, point_width);
+                  corner_point(h, w, d);
               }
 
               translate([-offset_from_center + corner_dist, -offset_from_center, z_pos]) {
-                  corner_point(point_radius, point_width);
+                  corner_point(w, h, d);
               }
 
             translate([-offset_from_center, -offset_from_center + corner_dist, z_pos]) {
-                  corner_point(point_radius, point_width);
+                  corner_point(h, w, d);
               }
 
           }
       }
   }
 
-  module corner_point(rad, width) {
-    scale([width,1,1]) sphere(r=rad);
+  module corner_point(w, h, d) {
+    scale([w, h, d]) sphere(r=1);
   }
 
   module the_box() {
