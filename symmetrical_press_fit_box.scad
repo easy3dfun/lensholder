@@ -32,14 +32,14 @@ if(show_copy)
     the_corners();
     translate([0, 0, box_height*2])
       rotate([180, 0, 0])
-        corner_points();
+        corner_points(2);
   };
 
   // --------------------------------------------------
   // Modules
   // --------------------------------------------------
 
-  module corner_points() {
+  module corner_points(point_width=1) {
       point_radius = 1.5;
       point_height = 8; // How high up the sphere is from the bottom
       corner_dist = 10;
@@ -51,23 +51,27 @@ if(show_copy)
           outer_box(outer_side-0.01);  // Clip inside the wall of the box
           union() {
               translate([offset_from_center - corner_dist, offset_from_center, z_pos]) {
-                  sphere(r=point_radius);
+                  corner_point(point_radius, point_width);
               }
 
               translate([offset_from_center, offset_from_center-corner_dist, z_pos]) {
-                  sphere(r=point_radius);
+                  corner_point(point_radius, point_width);
               }
 
               translate([-offset_from_center + corner_dist, -offset_from_center, z_pos]) {
-                  sphere(r=point_radius);
+                  corner_point(point_radius, point_width);
               }
 
             translate([-offset_from_center, -offset_from_center + corner_dist, z_pos]) {
-                  sphere(r=point_radius);
+                  corner_point(point_radius, point_width);
               }
 
           }
       }
+  }
+
+  module corner_point(rad, width) {
+    scale([width,1,1]) sphere(r=rad);
   }
 
   module the_box() {
