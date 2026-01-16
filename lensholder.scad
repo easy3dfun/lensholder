@@ -28,7 +28,6 @@ corner_radius    = 8;     // Radius for the rounded corners of the square box
 diameter_with_tolerance = lens_diameter + 2*tolerance;
 outer_side = diameter_with_tolerance + 2*wall_thickness;
 inner_side = diameter_with_tolerance;
-inner_corner_radius = corner_radius - wall_thickness;
 
 lens_box();
 
