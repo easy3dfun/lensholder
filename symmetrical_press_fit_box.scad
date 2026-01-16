@@ -93,7 +93,7 @@ if(show_copy)
       corner_arc(
         length       = corner_length,
         height       = 11,
-        thickness    = 1,
+        thickness    = 0.8,
         rad          = corner_radius - wall_thickness,
         shape_factor = 0,
         arc_width    = 10,
