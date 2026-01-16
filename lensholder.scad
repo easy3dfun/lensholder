@@ -17,7 +17,7 @@ $fs = production_quality ? 0.125 : 0.25; // minimum size of a fragment
 /* Parameters in mm */
 lens_diameter    = 60;
 tolerance        = 0.5;   // Gap on each side so the lens easily fits
-wall_thickness   = 1;     // Walls of the box
+wall_thickness   = 1.2;     // Walls of the box
 bottom_thickness = 1;     // Bottom of the box
 box_height       = 7;
 sphere_diameter  = 1;     // Size of the spheres
