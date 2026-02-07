@@ -1,13 +1,3 @@
-module lensholder_clamps_spheres() {
-    for (i = [0:3]) {
-        angle = i*90;
-        x = (diameter_with_tolerance/2) * cos(angle);
-        y = (diameter_with_tolerance/2) * sin(angle);
-        translate([x, y, sphere_pos_z])
-                sphere(r=sphere_diameter);
-    }
-}
-
 module lensholder_clamps_tori() {
   torus_thickness = 1;
   torus_radius = 1.5;
